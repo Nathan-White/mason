@@ -8,4 +8,7 @@ public func routes(_ router: Router) throws {
     router.get("hello") { req in
         return "Hello, world!"
     }
+    router.get("home") { req -> Future<View> in
+        return try req.view().render("home")
+    }
 }

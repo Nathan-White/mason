@@ -1,5 +1,6 @@
+import FluentSQLite
 import Vapor
-
+import Leaf
 /// Called before your application initializes.
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#configureswift)
@@ -14,4 +15,21 @@ public func configure(
     services.register(router, as: Router.self)
 
     // Configure the rest of your application here
+    try services.register(LeafProvider())
+    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
+    
+    let directoryConfig = DirectoryConfig.detect()
+    services.register(directoryConfig)
+    
+    try services.register(FluentSQLiteProvider())
+    
+    var databaseConfig = DatabasesConfig()
+    let db = try SQLiteDatabase(storage: .file(path: "\(directoryConfig.workDir)forums.db"))
+    databaseConfig.add(database: db, as: .sqlite)
+    services.register(databaseConfig)
+    
+    var migrationConfig = MigrationConfig()
+    migrationConfig.add(model: User.self, database: .sqlite)
+    services.register(migrationConfig)
+
 }
